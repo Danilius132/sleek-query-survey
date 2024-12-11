@@ -2,10 +2,9 @@ import { useState } from "react";
 import { SurveyProgress } from "@/components/SurveyProgress";
 import { SurveyTooltip } from "@/components/SurveyTooltip";
 import { Rating } from "@/components/Rating";
-import { Button } from "@/components/ui/button";
+import { NavigationButtons } from "@/components/NavigationButtons";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 
 const TOTAL_STEPS = 6;
@@ -47,82 +46,75 @@ export default function Index() {
   return (
     <div className="min-h-screen p-6 flex flex-col items-center justify-center">
       <div className="w-full max-w-3xl space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold">Опрос для разработки корпоративной базы знаний</h1>
-          <p className="text-muted-foreground">
+        <div className="text-center space-y-4">
+          <h1 className="text-4xl font-bold tracking-tight">
+            Опрос для разработки корпоративной базы знаний
+          </h1>
+          <p className="text-xl text-muted-foreground">
             Помогите нам создать эффективный инструмент для работы всей организации
           </p>
         </div>
 
         <SurveyProgress currentStep={currentStep} totalSteps={TOTAL_STEPS} />
 
-        <div className="survey-card space-y-6">
+        <div className="survey-card space-y-8">
           {currentStep === 1 && (
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <div className="flex items-center">
-                  <h2 className="text-xl font-semibold">Общая информация</h2>
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <h2 className="section-title">Общая информация</h2>
                   <SurveyTooltip content="Базовая информация о вашей роли и планируемом использовании базы знаний" />
                 </div>
                 
-                <div className="space-y-4">
-                  <div>
-                    <Label>К какому отделу вы относитесь?</Label>
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <Label className="question-text">
+                      К какому отделу вы относитесь?
+                    </Label>
                     <RadioGroup
                       value={formData.department}
                       onValueChange={(value) => 
                         setFormData(prev => ({ ...prev, department: value }))
                       }
-                      className="mt-2 space-y-2"
+                      className="space-y-3"
                     >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="legal" id="legal" />
-                        <Label htmlFor="legal">Юридический отдел</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="sales" id="sales" />
-                        <Label htmlFor="sales">Отдел продаж</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="management" id="management" />
-                        <Label htmlFor="management">Руководство</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="other" id="other" />
-                        <Label htmlFor="other">Другое</Label>
-                      </div>
+                      {[
+                        ["legal", "Юридический отдел"],
+                        ["sales", "Отдел продаж"],
+                        ["management", "Руководство"],
+                        ["other", "Другое"]
+                      ].map(([value, label]) => (
+                        <div key={value} className="radio-label">
+                          <RadioGroupItem value={value} id={value} />
+                          <Label htmlFor={value}>{label}</Label>
+                        </div>
+                      ))}
                     </RadioGroup>
                   </div>
 
-                  <div>
-                    <Label>Как часто вы планируете использовать базу знаний?</Label>
+                  <div className="space-y-4">
+                    <Label className="question-text">
+                      Как часто вы планируете использовать базу знаний?
+                    </Label>
                     <RadioGroup
                       value={formData.frequency}
                       onValueChange={(value) => 
                         setFormData(prev => ({ ...prev, frequency: value }))
                       }
-                      className="mt-2 space-y-2"
+                      className="space-y-3"
                     >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="several-times-day" id="several-times-day" />
-                        <Label htmlFor="several-times-day">Несколько раз в день</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="daily" id="daily" />
-                        <Label htmlFor="daily">Ежедневно</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="several-times-week" id="several-times-week" />
-                        <Label htmlFor="several-times-week">Несколько раз в неделю</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="several-times-month" id="several-times-month" />
-                        <Label htmlFor="several-times-month">Несколько раз в месяц</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="less" id="less" />
-                        <Label htmlFor="less">Реже</Label>
-                      </div>
+                      {[
+                        ["several-times-day", "Несколько раз в день"],
+                        ["daily", "Ежедневно"],
+                        ["several-times-week", "Несколько раз в неделю"],
+                        ["several-times-month", "Несколько раз в месяц"],
+                        ["less", "Реже"]
+                      ].map(([value, label]) => (
+                        <div key={value} className="radio-label">
+                          <RadioGroupItem value={value} id={value} />
+                          <Label htmlFor={value}>{label}</Label>
+                        </div>
+                      ))}
                     </RadioGroup>
                   </div>
                 </div>
@@ -131,70 +123,55 @@ export default function Index() {
           )}
 
           {currentStep === 2 && (
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <div className="flex items-center">
-                  <h2 className="text-xl font-semibold">Содержание и структура</h2>
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <h2 className="section-title">Содержание и структура</h2>
                   <SurveyTooltip content="Оцените важность различных типов документов для вашей работы" />
                 </div>
                 
-                <div className="space-y-4">
-                  <Label>Оцените важность следующих типов документов (от 1 до 5)</Label>
+                <div className="space-y-6">
+                  <Label className="question-text">
+                    Оцените важность следующих типов документов (от 1 до 5)
+                  </Label>
                   
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span>Шаблоны документов</span>
-                      <Rating 
-                        value={formData.documentTypes.templates}
-                        onChange={(value) => 
-                          setFormData(prev => ({
-                            ...prev,
-                            documentTypes: {
-                              ...prev.documentTypes,
-                              templates: value
-                            }
-                          }))
-                        }
-                      />
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <span>Регламенты и процедуры</span>
-                      <Rating 
-                        value={formData.documentTypes.regulations}
-                        onChange={(value) => 
-                          setFormData(prev => ({
-                            ...prev,
-                            documentTypes: {
-                              ...prev.documentTypes,
-                              regulations: value
-                            }
-                          }))
-                        }
-                      />
-                    </div>
-                    
-                    {/* Add similar Rating components for other document types */}
+                  <div className="space-y-6">
+                    {[
+                      ["templates", "Шаблоны документов"],
+                      ["regulations", "Регламенты и процедуры"],
+                      ["faq", "Часто задаваемые вопросы (FAQ)"],
+                      ["training", "Обучающие материалы"],
+                      ["reference", "Справочная информация"],
+                      ["contacts", "Контактные данные сотрудников"]
+                    ].map(([key, label]) => (
+                      <div key={key} className="flex justify-between items-center">
+                        <span className="text-lg">{label}</span>
+                        <Rating 
+                          value={formData.documentTypes[key as keyof typeof formData.documentTypes]}
+                          onChange={(value) => 
+                            setFormData(prev => ({
+                              ...prev,
+                              documentTypes: {
+                                ...prev.documentTypes,
+                                [key]: value
+                              }
+                            }))
+                          }
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Add similar sections for steps 3-6 */}
-
-          <div className="flex justify-between mt-8">
-            <Button
-              variant="outline"
-              onClick={handlePrevious}
-              disabled={currentStep === 1}
-            >
-              Назад
-            </Button>
-            <Button onClick={handleNext}>
-              {currentStep === TOTAL_STEPS ? "Завершить" : "Далее"}
-            </Button>
-          </div>
+          <NavigationButtons
+            currentStep={currentStep}
+            totalSteps={TOTAL_STEPS}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+          />
         </div>
       </div>
     </div>
