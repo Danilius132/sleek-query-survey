@@ -32,6 +32,7 @@ export function SurveyQuestion({
             options={options}
             value={value}
             onValueChange={onChange}
+            groupLabel={question}
           />
         </div>
       </div>

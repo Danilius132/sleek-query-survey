@@ -81,3 +81,20 @@
   @apply bg-secondary text-secondary-foreground;
   @apply hover:bg-secondary/90;
 }
+
+/* Animation classes */
+.rating-button-enter {
+  @apply animate-in zoom-in-95 duration-200;
+}
+
+.rating-button-selected {
+  @apply animate-in scale-105 duration-200;
+}
+
+.survey-step-enter {
+  @apply animate-in fade-in-50 slide-in-from-right-4 duration-300;
+}
+
+.survey-step-exit {
+  @apply animate-out fade-out-50 slide-out-to-left-4 duration-300;
+}
