@@ -11,6 +11,8 @@ import {
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
 } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis } from "recharts";
 
@@ -25,6 +27,16 @@ interface AnalyticsData {
   };
 }
 
+// Новая цветовая палитра
+const CHART_COLORS = {
+  primary: "#1EAEDB",    // Яркий синий
+  secondary: "#33C3F0",  // Небесно-голубой
+  tertiary: "#D3E4FD",   // Мягкий голубой
+  quaternary: "#E5DEFF", // Мягкий фиолетовый
+  quinary: "#F2FCE2",    // Мягкий зеленый
+  senary: "#FEF7CD"      // Мягкий желтый
+};
+
 export default function Analytics() {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,7 +44,6 @@ export default function Analytics() {
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        // Получаем все ответы на опросы
         const { data: responses } = await supabase
           .from("survey_responses")
           .select(`
@@ -192,8 +203,8 @@ export default function Analytics() {
             config={{
               frequency: {
                 theme: {
-                  light: "#E15858",
-                  dark: "#E15858"
+                  light: CHART_COLORS.primary,
+                  dark: CHART_COLORS.primary
                 }
               }
             }}
@@ -201,9 +212,10 @@ export default function Analytics() {
             <BarChart data={frequencyData}>
               <XAxis dataKey="name" />
               <YAxis />
-              <Bar dataKey="Несколько раз в день" fill="#E15858" />
-              <Bar dataKey="Ежедневно" fill="#F87171" />
-              <Bar dataKey="Несколько раз в неделю" fill="#FCA5A5" />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Bar dataKey="Несколько раз в день" fill={CHART_COLORS.primary} />
+              <Bar dataKey="Ежедневно" fill={CHART_COLORS.secondary} />
+              <Bar dataKey="Несколько раз в неделю" fill={CHART_COLORS.tertiary} />
               <ChartLegend>
                 <ChartLegendContent />
               </ChartLegend>
@@ -225,8 +237,8 @@ export default function Analytics() {
             config={{
               docTypes: {
                 theme: {
-                  light: "#E15858",
-                  dark: "#E15858"
+                  light: CHART_COLORS.primary,
+                  dark: CHART_COLORS.primary
                 }
               }
             }}
@@ -234,12 +246,13 @@ export default function Analytics() {
             <BarChart data={docTypesData}>
               <XAxis dataKey="name" />
               <YAxis domain={[0, 5]} />
-              <Bar dataKey="Шаблоны" fill="#E15858" />
-              <Bar dataKey="Регламенты" fill="#F87171" />
-              <Bar dataKey="FAQ" fill="#FCA5A5" />
-              <Bar dataKey="Обучение" fill="#EF4444" />
-              <Bar dataKey="Справочники" fill="#DC2626" />
-              <Bar dataKey="Контакты" fill="#B91C1C" />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Bar dataKey="Шаблоны" fill={CHART_COLORS.primary} />
+              <Bar dataKey="Регламенты" fill={CHART_COLORS.secondary} />
+              <Bar dataKey="FAQ" fill={CHART_COLORS.tertiary} />
+              <Bar dataKey="Обучение" fill={CHART_COLORS.quaternary} />
+              <Bar dataKey="Справочники" fill={CHART_COLORS.quinary} />
+              <Bar dataKey="Контакты" fill={CHART_COLORS.senary} />
               <ChartLegend>
                 <ChartLegendContent />
               </ChartLegend>
@@ -261,8 +274,8 @@ export default function Analytics() {
             config={{
               usability: {
                 theme: {
-                  light: "#E15858",
-                  dark: "#E15858"
+                  light: CHART_COLORS.primary,
+                  dark: CHART_COLORS.primary
                 }
               }
             }}
@@ -270,9 +283,10 @@ export default function Analytics() {
             <BarChart data={usabilityData}>
               <XAxis dataKey="name" />
               <YAxis domain={[0, 5]} />
-              <Bar dataKey="Поиск" fill="#E15858" />
-              <Bar dataKey="Навигация" fill="#F87171" />
-              <Bar dataKey="Организация" fill="#FCA5A5" />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Bar dataKey="Поиск" fill={CHART_COLORS.primary} />
+              <Bar dataKey="Навигация" fill={CHART_COLORS.secondary} />
+              <Bar dataKey="Организация" fill={CHART_COLORS.tertiary} />
               <ChartLegend>
                 <ChartLegendContent />
               </ChartLegend>
