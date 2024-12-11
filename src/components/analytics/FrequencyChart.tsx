@@ -31,7 +31,7 @@ export function FrequencyChart({ data }: FrequencyChartProps) {
                 light: CHART_COLORS.primary,
                 dark: CHART_COLORS.primary
               }
-            }}
+            }
           }}
         >
           <BarChart data={data}>

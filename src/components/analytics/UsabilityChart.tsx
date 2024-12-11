@@ -30,7 +30,7 @@ export function UsabilityChart({ data }: UsabilityChartProps) {
                 light: CHART_COLORS.primary,
                 dark: CHART_COLORS.primary
               }
-            }}
+            }
           }}
         >
           <BarChart data={data}>

@@ -33,7 +33,7 @@ export function DocumentTypesChart({ data }: DocumentTypesChartProps) {
                 light: CHART_COLORS.primary,
                 dark: CHART_COLORS.primary
               }
-            }}
+            }
           }}
         >
           <BarChart data={data}>
