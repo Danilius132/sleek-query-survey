@@ -3,31 +3,34 @@ import { SurveyProgress } from "@/components/SurveyProgress";
 import { NavigationButtons } from "@/components/NavigationButtons";
 import { SurveyQuestion } from "@/components/SurveyQuestion";
 import { useToast } from "@/components/ui/use-toast";
+import { FeedbackSection } from "@/components/FeedbackSection";
+import type { SurveyFormData } from "@/types/survey";
 
 const TOTAL_STEPS = 6;
 
+const initialFormData: SurveyFormData = {
+  department: "",
+  frequency: "",
+  documentTypes: {
+    templates: 0,
+    regulations: 0,
+    faq: 0,
+    training: 0,
+    reference: 0,
+    contacts: 0
+  },
+  usability: {
+    search: 0,
+    navigation: 0,
+    organization: 0
+  },
+  integration: "",
+  feedback: ""
+};
+
 export default function Index() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({
-    department: "",
-    frequency: "",
-    documentTypes: {
-      templates: 0,
-      regulations: 0,
-      faq: 0,
-      training: 0,
-      reference: 0,
-      contacts: 0
-    },
-    usability: {
-      search: 0,
-      navigation: 0,
-      organization: 0
-    },
-    integration: "",
-    feedback: ""
-  });
-  
+  const [formData, setFormData] = useState<SurveyFormData>(initialFormData);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -105,16 +108,17 @@ export default function Index() {
               { value: "reference", label: "Справочная информация" },
               { value: "contacts", label: "Контактные данные сотрудников" }
             ]}
-            value={formData.documentTypes[formData.documentTypes]}
-            onChange={(value) => 
+            value={String(formData.documentTypes[formData.documentTypes as keyof typeof formData.documentTypes] || 0)}
+            onChange={(value) => {
+              const key = value as keyof typeof formData.documentTypes;
               setFormData(prev => ({
                 ...prev,
                 documentTypes: {
                   ...prev.documentTypes,
-                  [value]: value
+                  [key]: Number(value)
                 }
-              }))
-            }
+              }));
+            }}
           />
         );
 
@@ -129,16 +133,17 @@ export default function Index() {
               { value: "navigation", label: "Удобство навигации" },
               { value: "organization", label: "Организация материалов" }
             ]}
-            value={formData.usability[formData.usability]}
-            onChange={(value) => 
+            value={String(formData.usability[formData.usability as keyof typeof formData.usability] || 0)}
+            onChange={(value) => {
+              const key = value as keyof typeof formData.usability;
               setFormData(prev => ({
                 ...prev,
                 usability: {
                   ...prev.usability,
-                  [value]: value
+                  [key]: Number(value)
                 }
-              }))
-            }
+              }));
+            }}
           />
         );
 
@@ -161,32 +166,10 @@ export default function Index() {
 
       case 6:
         return (
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <h2 className="section-title">Дополнительные пожелания</h2>
-                <SurveyTooltip content="Поделитесь своими идеями и пожеланиями по улучшению базы знаний" />
-              </div>
-              
-              <div className="space-y-3">
-                <Label className="question-text">
-                  Какие дополнительные функции или возможности вы хотели бы видеть в базе знаний?
-                </Label>
-                <textarea
-                  value={formData.feedback}
-                  onChange={(e) => 
-                    setFormData(prev => ({ ...prev, feedback: e.target.value }))
-                  }
-                  className={cn(
-                    "w-full min-h-[150px] p-4 rounded-lg bg-secondary/50 border border-border/5",
-                    "focus:outline-none focus:ring-2 focus:ring-primary/50",
-                    "placeholder:text-muted-foreground resize-none"
-                  )}
-                  placeholder="Введите ваши пожелания..."
-                />
-              </div>
-            </div>
-          </div>
+          <FeedbackSection
+            value={formData.feedback}
+            onChange={(value) => setFormData(prev => ({ ...prev, feedback: value }))}
+          />
         );
 
       default:
