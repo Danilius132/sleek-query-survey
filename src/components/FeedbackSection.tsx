@@ -1,4 +1,3 @@
-import { SurveyTooltip } from "./SurveyTooltip";
 import { Label } from "./ui/label";
 import { cn } from "@/lib/utils";
 
@@ -11,9 +10,8 @@ export function FeedbackSection({ value, onChange }: FeedbackSectionProps) {
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center">
           <h2 className="section-title">Дополнительные пожелания</h2>
-          <SurveyTooltip content="Поделитесь своими идеями и пожеланиями по улучшению базы знаний" />
         </div>
         
         <div className="space-y-3">

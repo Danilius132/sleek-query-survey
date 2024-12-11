@@ -9,8 +9,6 @@ import {
 } from "@/components/ui/card";
 import {
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
 } from "@/components/ui/chart";
@@ -90,9 +88,6 @@ export default function Analytics() {
               <Bar dataKey="Несколько раз в день" fill="#E15858" />
               <Bar dataKey="Ежедневно" fill="#F87171" />
               <Bar dataKey="Несколько раз в неделю" fill="#FCA5A5" />
-              <ChartTooltip>
-                <ChartTooltipContent />
-              </ChartTooltip>
               <ChartLegend>
                 <ChartLegendContent />
               </ChartLegend>
@@ -129,9 +124,6 @@ export default function Analytics() {
               <Bar dataKey="Обучение" fill="#EF4444" />
               <Bar dataKey="Справочники" fill="#DC2626" />
               <Bar dataKey="Контакты" fill="#B91C1C" />
-              <ChartTooltip>
-                <ChartTooltipContent />
-              </ChartTooltip>
               <ChartLegend>
                 <ChartLegendContent />
               </ChartLegend>
@@ -165,9 +157,6 @@ export default function Analytics() {
               <Bar dataKey="Поиск" fill="#E15858" />
               <Bar dataKey="Навигация" fill="#F87171" />
               <Bar dataKey="Организация" fill="#FCA5A5" />
-              <ChartTooltip>
-                <ChartTooltipContent />
-              </ChartTooltip>
               <ChartLegend>
                 <ChartLegendContent />
               </ChartLegend>

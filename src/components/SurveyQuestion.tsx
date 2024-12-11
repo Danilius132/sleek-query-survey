@@ -1,4 +1,3 @@
-import { SurveyTooltip } from "@/components/SurveyTooltip";
 import { SurveyRadioGroup } from "@/components/SurveyRadioGroup";
 
 interface QuestionProps {
@@ -12,7 +11,6 @@ interface QuestionProps {
 
 export function SurveyQuestion({
   title,
-  tooltipContent,
   question,
   options,
   value,
@@ -23,7 +21,6 @@ export function SurveyQuestion({
       <div className="space-y-4">
         <div className="flex items-center">
           <h2 className="section-title">{title}</h2>
-          {tooltipContent && <SurveyTooltip content={tooltipContent} />}
         </div>
         
         <div className="space-y-3">
