@@ -1,4 +1,14 @@
-const API_URL = 'http://localhost:8000/api';
+// Mock data for development
+const mockDepartments = [
+  { id: 1, name: "IT отдел" },
+  { id: 2, name: "Отдел продаж" },
+  { id: 3, name: "Бухгалтерия" },
+  { id: 4, name: "HR отдел" }
+];
+
+const mockSurveys = [
+  { id: 1, name: "Опрос по базе знаний", active: true }
+];
 
 export interface SurveyResponse {
   survey: number;
@@ -20,41 +30,17 @@ export interface SurveyResponse {
 export const api = {
   // Получение списка отделов
   getDepartments: async () => {
-    const response = await fetch(`${API_URL}/departments/`);
-    if (!response.ok) throw new Error('Failed to fetch departments');
-    return response.json();
+    return { results: mockDepartments };
   },
 
   // Получение активных опросов
   getSurveys: async () => {
-    const response = await fetch(`${API_URL}/surveys/`);
-    if (!response.ok) throw new Error('Failed to fetch surveys');
-    return response.json();
+    return { results: mockSurveys };
   },
 
   // Отправка ответа на опрос
   submitSurveyResponse: async (data: SurveyResponse) => {
-    try {
-      console.log('Отправляемые данные:', data);
-      
-      const response = await fetch(`${API_URL}/responses/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Ответ сервера:', errorData);
-        throw new Error(`Server error: ${JSON.stringify(errorData)}`);
-      }
-
-      return response.json();
-    } catch (error) {
-      console.error('Полная ошибка:', error);
-      throw error;
-    }
+    console.log('Отправляемые данные:', data);
+    return { success: true };
   }
-}; 
+};

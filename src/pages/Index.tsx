@@ -4,7 +4,8 @@ import { NavigationButtons } from "@/components/NavigationButtons";
 import { SurveyQuestion } from "@/components/SurveyQuestion";
 import { useToast } from "@/components/ui/use-toast";
 import { FeedbackSection } from "@/components/FeedbackSection";
-import { Rating } from "@/components/Rating";
+import { DocumentTypesSection } from "@/components/DocumentTypesSection";
+import { UsabilitySection } from "@/components/UsabilitySection";
 import { api } from "@/lib/api";
 import type { SurveyFormData } from "@/types/survey";
 
@@ -191,46 +192,18 @@ export default function Index() {
 
       case 3:
         return (
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <h2 className="section-title">Типы документов</h2>
-              <p className="question-text">Оцените важность следующих типов документов (от 1 до 5):</p>
-              <div className="space-y-4">
-                {Object.entries(formData.documentTypes).map(([key, value]) => (
-                  <div key={key} className="flex justify-between items-center p-3 bg-secondary/50 rounded-lg">
-                    <span className="text-base">{getDocumentTypeLabel(key)}</span>
-                    <Rating
-                      value={value}
-                      onChange={(newValue) => handleDocumentTypeRating(key as keyof typeof formData.documentTypes, newValue)}
-                      max={5}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <DocumentTypesSection
+            documentTypes={formData.documentTypes}
+            onRatingChange={handleDocumentTypeRating}
+          />
         );
 
       case 4:
         return (
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <h2 className="section-title">Удобство использования</h2>
-              <p className="question-text">Оцените важность следующих характеристик (от 1 до 5):</p>
-              <div className="space-y-4">
-                {Object.entries(formData.usability).map(([key, value]) => (
-                  <div key={key} className="flex justify-between items-center p-3 bg-secondary/50 rounded-lg">
-                    <span className="text-base">{getUsabilityLabel(key)}</span>
-                    <Rating
-                      value={value}
-                      onChange={(newValue) => handleUsabilityRating(key as keyof typeof formData.usability, newValue)}
-                      max={5}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <UsabilitySection
+            usability={formData.usability}
+            onRatingChange={handleUsabilityRating}
+          />
         );
 
       case 5:
@@ -261,27 +234,6 @@ export default function Index() {
       default:
         return null;
     }
-  };
-
-  const getDocumentTypeLabel = (key: string): string => {
-    const labels: Record<string, string> = {
-      templates: "Шаблоны документов",
-      regulations: "Регламенты и процедуры",
-      faq: "Часто задаваемые вопросы (FAQ)",
-      training: "Обучающие материалы",
-      reference: "Справочная информация",
-      contacts: "Контактные данные сотрудников"
-    };
-    return labels[key] || key;
-  };
-
-  const getUsabilityLabel = (key: string): string => {
-    const labels: Record<string, string> = {
-      search: "Поиск по базе знаний",
-      navigation: "Удобство навигации",
-      organization: "Организация материалов"
-    };
-    return labels[key] || key;
   };
 
   const mapIntegrationPreference = (integration: string): string => {
