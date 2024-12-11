@@ -44,30 +44,30 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen p-6 flex flex-col items-center justify-center">
-      <div className="w-full max-w-3xl space-y-8">
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight">
+    <div className="min-h-screen p-4 flex flex-col items-center justify-center">
+      <div className="w-full max-w-2xl space-y-6">
+        <div className="text-center space-y-3">
+          <h1 className="text-2xl font-bold tracking-tight">
             Опрос для разработки корпоративной базы знаний
           </h1>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-lg text-muted-foreground">
             Помогите нам создать эффективный инструмент для работы всей организации
           </p>
         </div>
 
         <SurveyProgress currentStep={currentStep} totalSteps={TOTAL_STEPS} />
 
-        <div className="survey-card space-y-8">
+        <div className="survey-card space-y-6">
           {currentStep === 1 && (
-            <div className="space-y-8">
+            <div className="space-y-6">
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <h2 className="section-title">Общая информация</h2>
                   <SurveyTooltip content="Базовая информация о вашей роли и планируемом использовании базы знаний" />
                 </div>
                 
-                <div className="space-y-6">
-                  <div className="space-y-4">
+                <div className="space-y-5">
+                  <div className="space-y-3">
                     <Label className="question-text">
                       К какому отделу вы относитесь?
                     </Label>
@@ -76,7 +76,7 @@ export default function Index() {
                       onValueChange={(value) => 
                         setFormData(prev => ({ ...prev, department: value }))
                       }
-                      className="space-y-3"
+                      className="space-y-2"
                     >
                       {[
                         ["legal", "Юридический отдел"],
@@ -92,7 +92,7 @@ export default function Index() {
                     </RadioGroup>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <Label className="question-text">
                       Как часто вы планируете использовать базу знаний?
                     </Label>
@@ -101,7 +101,7 @@ export default function Index() {
                       onValueChange={(value) => 
                         setFormData(prev => ({ ...prev, frequency: value }))
                       }
-                      className="space-y-3"
+                      className="space-y-2"
                     >
                       {[
                         ["several-times-day", "Несколько раз в день"],
@@ -123,19 +123,19 @@ export default function Index() {
           )}
 
           {currentStep === 2 && (
-            <div className="space-y-8">
+            <div className="space-y-6">
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <h2 className="section-title">Содержание и структура</h2>
                   <SurveyTooltip content="Оцените важность различных типов документов для вашей работы" />
                 </div>
                 
-                <div className="space-y-6">
+                <div className="space-y-5">
                   <Label className="question-text">
                     Оцените важность следующих типов документов (от 1 до 5)
                   </Label>
                   
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     {[
                       ["templates", "Шаблоны документов"],
                       ["regulations", "Регламенты и процедуры"],
@@ -145,7 +145,7 @@ export default function Index() {
                       ["contacts", "Контактные данные сотрудников"]
                     ].map(([key, label]) => (
                       <div key={key} className="flex justify-between items-center">
-                        <span className="text-lg">{label}</span>
+                        <span className="text-base">{label}</span>
                         <Rating 
                           value={formData.documentTypes[key as keyof typeof formData.documentTypes]}
                           onChange={(value) => 
