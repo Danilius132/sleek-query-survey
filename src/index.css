@@ -4,22 +4,22 @@
 
 @layer base {
   :root {
-    --background: 215 28% 17%;
+    --background: 222 14% 12%;
     --foreground: 210 40% 98%;
 
-    --card: 215 28% 19%;
+    --card: 222 14% 14%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 215 28% 17%;
+    --popover: 222 14% 12%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 358 69% 49%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 215 28% 23%;
+    --secondary: 222 14% 18%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 215 28% 23%;
+    --muted: 222 14% 18%;
     --muted-foreground: 215 20% 75%;
 
     --accent: 358 69% 49%;
@@ -28,8 +28,8 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 215 28% 25%;
-    --input: 215 28% 25%;
+    --border: 222 14% 20%;
+    --input: 222 14% 20%;
     --ring: 358 69% 49%;
 
     --radius: 0.75rem;
@@ -46,15 +46,15 @@
 }
 
 .survey-card {
-  @apply bg-card p-6 rounded-lg border border-border/5 shadow-lg;
+  @apply bg-card p-6 rounded-lg border border-border/5 shadow-lg transition-all duration-300;
 }
 
 .tooltip-content {
-  @apply bg-popover text-popover-foreground px-2.5 py-1 text-sm rounded-md shadow-md;
+  @apply bg-popover text-popover-foreground px-3 py-1.5 text-sm rounded-md shadow-md;
 }
 
 .progress-bar {
-  @apply h-2.5 rounded-full bg-secondary overflow-hidden transition-all duration-300 ease-in-out;
+  @apply h-3 rounded-full bg-secondary overflow-hidden transition-all duration-300 ease-in-out;
 }
 
 .progress-bar-fill {
@@ -62,23 +62,23 @@
 }
 
 .radio-label {
-  @apply flex items-center space-x-2.5 rounded-lg p-3 cursor-pointer transition-colors hover:bg-secondary;
+  @apply flex items-center space-x-3 rounded-lg p-4 cursor-pointer transition-colors hover:bg-secondary border border-transparent hover:border-primary/20;
 }
 
 .question-text {
-  @apply text-base leading-relaxed font-medium text-foreground/90;
+  @apply text-lg leading-relaxed font-medium text-foreground/90 mb-6;
 }
 
 .section-title {
-  @apply text-xl font-bold mb-4 text-foreground;
+  @apply text-2xl font-bold mb-6 text-foreground;
 }
 
 .nav-button {
-  @apply flex items-center gap-1.5 px-4 py-2 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-primary/50 focus:outline-none text-sm;
+  @apply flex items-center gap-2 px-5 py-2.5 rounded-lg transition-all duration-200 focus:ring-2 focus:ring-primary/50 focus:outline-none text-base font-medium;
 }
 
 .nav-button-primary {
-  @apply bg-primary text-primary-foreground hover:bg-primary/90;
+  @apply bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 active:scale-100;
 }
 
 .nav-button-secondary {
