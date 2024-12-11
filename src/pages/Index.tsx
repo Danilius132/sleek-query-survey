@@ -1,12 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { SurveyProgress } from "@/components/SurveyProgress";
 import { NavigationButtons } from "@/components/NavigationButtons";
-import { SurveyQuestion } from "@/components/SurveyQuestion";
-import { FeedbackSection } from "@/components/FeedbackSection";
-import { DocumentTypesSection } from "@/components/DocumentTypesSection";
-import { UsabilitySection } from "@/components/UsabilitySection";
+import { SurveyStepManager } from "@/components/steps/SurveyStepManager";
 import { useSurveySubmission } from "@/hooks/useSurveySubmission";
-import { supabase } from "@/integrations/supabase/client";
 import type { SurveyFormData } from "@/types/survey-types";
 
 const TOTAL_STEPS = 6;
@@ -34,28 +30,7 @@ const initialFormData: SurveyFormData = {
 export default function Index() {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<SurveyFormData>(initialFormData);
-  const [departments, setDepartments] = useState([]);
   const { submitSurvey, isLoading } = useSurveySubmission();
-
-  useEffect(() => {
-    const fetchDepartments = async () => {
-      const { data } = await supabase
-        .from('employees')
-        .select('id, title')
-        .order('title');
-      
-      if (data) {
-        const uniqueDepartments = Array.from(new Set(data.map(emp => emp.title)))
-          .map(title => ({
-            id: title.toLowerCase().replace(/\s+/g, '-'),
-            name: title
-          }));
-        setDepartments(uniqueDepartments);
-      }
-    };
-
-    fetchDepartments();
-  }, []);
 
   const handleNext = async () => {
     if (currentStep < TOTAL_STEPS) {
@@ -75,102 +50,11 @@ export default function Index() {
     }
   };
 
-  const handleDocumentTypeRating = (type: keyof typeof formData.documentTypes, value: number) => {
+  const handleFormDataUpdate = (updates: Partial<SurveyFormData>) => {
     setFormData(prev => ({
       ...prev,
-      documentTypes: {
-        ...prev.documentTypes,
-        [type]: value
-      }
+      ...updates
     }));
-  };
-
-  const handleUsabilityRating = (type: keyof typeof formData.usability, value: number) => {
-    setFormData(prev => ({
-      ...prev,
-      usability: {
-        ...prev.usability,
-        [type]: value
-      }
-    }));
-  };
-
-  const renderQuestion = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <SurveyQuestion
-            title="Общая информация"
-            question="К какому отделу вы относитесь?"
-            options={departments.map(dept => ({
-              value: dept.id.toString(),
-              label: dept.name
-            }))}
-            value={formData.department}
-            onChange={(value) => setFormData(prev => ({ ...prev, department: value }))}
-          />
-        );
-
-      case 2:
-        return (
-          <SurveyQuestion
-            title="Частота использования"
-            question="Как часто вы планируете использовать базу знаний?"
-            options={[
-              { value: "several-times-day", label: "Несколько раз в день" },
-              { value: "daily", label: "Ежедневно" },
-              { value: "several-times-week", label: "Несколько раз в неделю" },
-              { value: "several-times-month", label: "Несколько раз в месяц" },
-              { value: "less", label: "Реже" }
-            ]}
-            value={formData.frequency}
-            onChange={(value) => setFormData(prev => ({ ...prev, frequency: value }))}
-          />
-        );
-
-      case 3:
-        return (
-          <DocumentTypesSection
-            documentTypes={formData.documentTypes}
-            onRatingChange={handleDocumentTypeRating}
-          />
-        );
-
-      case 4:
-        return (
-          <UsabilitySection
-            usability={formData.usability}
-            onRatingChange={handleUsabilityRating}
-          />
-        );
-
-      case 5:
-        return (
-          <SurveyQuestion
-            title="Интеграция"
-            question="Какой способ интеграции с существующими системами вы предпочитаете?"
-            options={[
-              { value: "full", label: "Полная интеграция со всеми системами" },
-              { value: "partial", label: "Частичная интеграция с основными системами" },
-              { value: "minimal", label: "Минимальная интеграция" },
-              { value: "none", label: "Без интеграции" }
-            ]}
-            value={formData.integration}
-            onChange={(value) => setFormData(prev => ({ ...prev, integration: value }))}
-          />
-        );
-
-      case 6:
-        return (
-          <FeedbackSection
-            value={formData.feedback}
-            onChange={(value) => setFormData(prev => ({ ...prev, feedback: value }))}
-          />
-        );
-
-      default:
-        return null;
-    }
   };
 
   return (
@@ -188,7 +72,11 @@ export default function Index() {
         <SurveyProgress currentStep={currentStep} totalSteps={TOTAL_STEPS} />
 
         <div className="survey-card">
-          {renderQuestion()}
+          <SurveyStepManager
+            currentStep={currentStep}
+            formData={formData}
+            onUpdateFormData={handleFormDataUpdate}
+          />
           
           <NavigationButtons
             currentStep={currentStep}
