@@ -1,12 +1,8 @@
 import { useState, useEffect } from "react";
 import { SurveyProgress } from "@/components/SurveyProgress";
-import { SurveyTooltip } from "@/components/SurveyTooltip";
-import { Rating } from "@/components/Rating";
 import { NavigationButtons } from "@/components/NavigationButtons";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
+import { SurveyQuestion } from "@/components/SurveyQuestion";
 import { useToast } from "@/components/ui/use-toast";
-import { cn } from "@/lib/utils";
 
 const TOTAL_STEPS = 6;
 
@@ -34,7 +30,6 @@ export default function Index() {
   
   const { toast } = useToast();
 
-  // Auto-scroll to question on step change
   useEffect(() => {
     const surveyCard = document.querySelector('.survey-card');
     if (surveyCard) {
@@ -63,201 +58,105 @@ export default function Index() {
     switch (currentStep) {
       case 1:
         return (
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <h2 className="section-title">Общая информация</h2>
-                <SurveyTooltip content="Базовая информация о вашей роли и планируемом использовании базы знаний" />
-              </div>
-              
-              <div className="space-y-3">
-                <Label className="question-text">
-                  К какому отделу вы относитесь?
-                </Label>
-                <RadioGroup
-                  value={formData.department}
-                  onValueChange={(value) => 
-                    setFormData(prev => ({ ...prev, department: value }))
-                  }
-                  className="space-y-2"
-                >
-                  {[
-                    ["legal", "Юридический отдел"],
-                    ["sales", "Отдел продаж"],
-                    ["management", "Руководство"],
-                    ["other", "Другое"]
-                  ].map(([value, label]) => (
-                    <div key={value} className="radio-label">
-                      <RadioGroupItem value={value} id={value} className="size-5" />
-                      <Label htmlFor={value} className="text-base">{label}</Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              </div>
-            </div>
-          </div>
+          <SurveyQuestion
+            title="Общая информация"
+            tooltipContent="Базовая информация о вашей роли и планируемом использовании базы знаний"
+            question="К какому отделу вы относитесь?"
+            options={[
+              { value: "legal", label: "Юридический отдел" },
+              { value: "sales", label: "Отдел продаж" },
+              { value: "management", label: "Руководство" },
+              { value: "other", label: "Другое" }
+            ]}
+            value={formData.department}
+            onChange={(value) => setFormData(prev => ({ ...prev, department: value }))}
+          />
         );
 
       case 2:
         return (
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <h2 className="section-title">Частота использования</h2>
-                <SurveyTooltip content="Информация о планируемой частоте использования базы знаний" />
-              </div>
-              
-              <div className="space-y-3">
-                <Label className="question-text">
-                  Как часто вы планируете использовать базу знаний?
-                </Label>
-                <RadioGroup
-                  value={formData.frequency}
-                  onValueChange={(value) => 
-                    setFormData(prev => ({ ...prev, frequency: value }))
-                  }
-                  className="space-y-2"
-                >
-                  {[
-                    ["several-times-day", "Несколько раз в день"],
-                    ["daily", "Ежедневно"],
-                    ["several-times-week", "Несколько раз в неделю"],
-                    ["several-times-month", "Несколько раз в месяц"],
-                    ["less", "Реже"]
-                  ].map(([value, label]) => (
-                    <div key={value} className="radio-label">
-                      <RadioGroupItem value={value} id={value} className="size-5" />
-                      <Label htmlFor={value} className="text-base">{label}</Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              </div>
-            </div>
-          </div>
+          <SurveyQuestion
+            title="Частота использования"
+            tooltipContent="Информация о планируемой частоте использования базы знаний"
+            question="Как часто вы планируете использовать базу знаний?"
+            options={[
+              { value: "several-times-day", label: "Несколько раз в день" },
+              { value: "daily", label: "Ежедневно" },
+              { value: "several-times-week", label: "Несколько раз в неделю" },
+              { value: "several-times-month", label: "Несколько раз в месяц" },
+              { value: "less", label: "Реже" }
+            ]}
+            value={formData.frequency}
+            onChange={(value) => setFormData(prev => ({ ...prev, frequency: value }))}
+          />
         );
 
       case 3:
         return (
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <h2 className="section-title">Типы документов</h2>
-                <SurveyTooltip content="Оцените важность различных типов документов для вашей работы" />
-              </div>
-              
-              <div className="space-y-5">
-                <Label className="question-text">
-                  Оцените важность следующих типов документов (от 1 до 5)
-                </Label>
-                
-                <div className="space-y-4">
-                  {[
-                    ["templates", "Шаблоны документов"],
-                    ["regulations", "Регламенты и процедуры"],
-                    ["faq", "Часто задаваемые вопросы (FAQ)"],
-                    ["training", "Обучающие материалы"],
-                    ["reference", "Справочная информация"],
-                    ["contacts", "Контактные данные сотрудников"]
-                  ].map(([key, label]) => (
-                    <div key={key} className="flex justify-between items-center bg-secondary/50 p-4 rounded-lg">
-                      <span className="text-base">{label}</span>
-                      <Rating 
-                        value={formData.documentTypes[key as keyof typeof formData.documentTypes]}
-                        onChange={(value) => 
-                          setFormData(prev => ({
-                            ...prev,
-                            documentTypes: {
-                              ...prev.documentTypes,
-                              [key]: value
-                            }
-                          }))
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+          <SurveyQuestion
+            title="Типы документов"
+            tooltipContent="Оцените важность различных типов документов для вашей работы"
+            question="Оцените важность следующих типов документов (от 1 до 5)"
+            options={[
+              { value: "templates", label: "Шаблоны документов" },
+              { value: "regulations", label: "Регламенты и процедуры" },
+              { value: "faq", label: "Часто задаваемые вопросы (FAQ)" },
+              { value: "training", label: "Обучающие материалы" },
+              { value: "reference", label: "Справочная информация" },
+              { value: "contacts", label: "Контактные данные сотрудников" }
+            ]}
+            value={formData.documentTypes[formData.documentTypes]}
+            onChange={(value) => 
+              setFormData(prev => ({
+                ...prev,
+                documentTypes: {
+                  ...prev.documentTypes,
+                  [value]: value
+                }
+              }))
+            }
+          />
         );
 
       case 4:
         return (
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <h2 className="section-title">Удобство использования</h2>
-                <SurveyTooltip content="Оцените важность различных аспектов удобства использования" />
-              </div>
-              
-              <div className="space-y-5">
-                <Label className="question-text">
-                  Оцените важность следующих характеристик (от 1 до 5)
-                </Label>
-                
-                <div className="space-y-4">
-                  {[
-                    ["search", "Поиск по базе знаний"],
-                    ["navigation", "Удобство навигации"],
-                    ["organization", "Организация материалов"]
-                  ].map(([key, label]) => (
-                    <div key={key} className="flex justify-between items-center bg-secondary/50 p-4 rounded-lg">
-                      <span className="text-base">{label}</span>
-                      <Rating 
-                        value={formData.usability[key as keyof typeof formData.usability]}
-                        onChange={(value) => 
-                          setFormData(prev => ({
-                            ...prev,
-                            usability: {
-                              ...prev.usability,
-                              [key]: value
-                            }
-                          }))
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+          <SurveyQuestion
+            title="Удобство использования"
+            tooltipContent="Оцените важность различных аспектов удобства использования"
+            question="Оцените важность следующих характеристик (от 1 до 5)"
+            options={[
+              { value: "search", label: "Поиск по базе знаний" },
+              { value: "navigation", label: "Удобство навигации" },
+              { value: "organization", label: "Организация материалов" }
+            ]}
+            value={formData.usability[formData.usability]}
+            onChange={(value) => 
+              setFormData(prev => ({
+                ...prev,
+                usability: {
+                  ...prev.usability,
+                  [value]: value
+                }
+              }))
+            }
+          />
         );
 
       case 5:
         return (
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <h2 className="section-title">Интеграция</h2>
-                <SurveyTooltip content="Выберите предпочтительный способ интеграции с существующими системами" />
-              </div>
-              
-              <div className="space-y-3">
-                <Label className="question-text">
-                  Какой способ интеграции с существующими системами вы предпочитаете?
-                </Label>
-                <RadioGroup
-                  value={formData.integration}
-                  onValueChange={(value) => 
-                    setFormData(prev => ({ ...prev, integration: value }))
-                  }
-                  className="space-y-2"
-                >
-                  {[
-                    ["full", "Полная интеграция со всеми системами"],
-                    ["partial", "Частичная интеграция с основными системами"],
-                    ["minimal", "Минимальная интеграция"],
-                    ["none", "Без интеграции"]
-                  ].map(([value, label]) => (
-                    <div key={value} className="radio-label">
-                      <RadioGroupItem value={value} id={value} className="size-5" />
-                      <Label htmlFor={value} className="text-base">{label}</Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              </div>
-            </div>
-          </div>
+          <SurveyQuestion
+            title="Интеграция"
+            tooltipContent="Выберите предпочтительный способ интеграции с существующими системами"
+            question="Какой способ интеграции с существующими системами вы предпочитаете?"
+            options={[
+              { value: "full", label: "Полная интеграция со всеми системами" },
+              { value: "partial", label: "Частичная интеграция с основными системами" },
+              { value: "minimal", label: "Минимальная интеграция" },
+              { value: "none", label: "Без интеграции" }
+            ]}
+            value={formData.integration}
+            onChange={(value) => setFormData(prev => ({ ...prev, integration: value }))}
+          />
         );
 
       case 6:

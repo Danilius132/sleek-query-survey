@@ -14,11 +14,28 @@ export function SurveyProgress({ currentStep, totalSteps }: SurveyProgressProps)
         <span>Шаг {currentStep} из {totalSteps}</span>
         <span>{Math.round(progress)}%</span>
       </div>
-      <div className="progress-bar">
+      <div className="h-4 rounded-full bg-secondary overflow-hidden transition-all duration-300 ease-in-out">
         <div 
-          className="progress-bar-fill"
+          className="h-full bg-primary transition-all duration-500 ease-in-out"
           style={{ width: `${progress}%` }}
+          role="progressbar"
+          aria-valuenow={progress}
+          aria-valuemin={0}
+          aria-valuemax={100}
         />
+      </div>
+      <div className="flex justify-between text-xs text-muted-foreground">
+        {Array.from({ length: totalSteps }, (_, i) => (
+          <div 
+            key={i + 1}
+            className={cn(
+              "transition-colors duration-200",
+              currentStep > i ? "text-primary" : "text-muted-foreground"
+            )}
+          >
+            {i + 1}
+          </div>
+        ))}
       </div>
     </div>
   );

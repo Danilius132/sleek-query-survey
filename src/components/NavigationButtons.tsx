@@ -15,24 +15,30 @@ export function NavigationButtons({
   onPrevious 
 }: NavigationButtonsProps) {
   return (
-    <div className="flex justify-between mt-8">
+    <div className="flex justify-between mt-8 px-4">
       <button
         onClick={onPrevious}
         disabled={currentStep === 1}
         className={cn(
           "nav-button nav-button-secondary",
+          "transition-all duration-200 hover:translate-x-[-4px]",
           currentStep === 1 && "opacity-50 cursor-not-allowed"
         )}
+        aria-label="Предыдущий вопрос"
       >
-        <ArrowLeft className="w-5 h-5" />
-        Назад
+        <ArrowLeft className="w-4 h-4" />
+        <span>Назад</span>
       </button>
       <button
         onClick={onNext}
-        className="nav-button nav-button-primary"
+        className={cn(
+          "nav-button nav-button-primary",
+          "transition-all duration-200 hover:translate-x-[4px]"
+        )}
+        aria-label={currentStep === totalSteps ? "Завершить опрос" : "Следующий вопрос"}
       >
-        {currentStep === totalSteps ? "Завершить" : "Далее"}
-        {currentStep !== totalSteps && <ArrowRight className="w-5 h-5" />}
+        <span>{currentStep === totalSteps ? "Завершить" : "Далее"}</span>
+        {currentStep !== totalSteps && <ArrowRight className="w-4 h-4" />}
       </button>
     </div>
   );
