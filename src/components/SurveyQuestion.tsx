@@ -21,7 +21,7 @@ export function SurveyQuestion({
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center">
           <h2 className="section-title">{title}</h2>
           {tooltipContent && <SurveyTooltip content={tooltipContent} />}
         </div>
