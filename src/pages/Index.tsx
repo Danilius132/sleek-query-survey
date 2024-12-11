@@ -4,6 +4,7 @@ import { NavigationButtons } from "@/components/NavigationButtons";
 import { SurveyQuestion } from "@/components/SurveyQuestion";
 import { useToast } from "@/components/ui/use-toast";
 import { FeedbackSection } from "@/components/FeedbackSection";
+import { Rating } from "@/components/Rating";
 import type { SurveyFormData } from "@/types/survey";
 
 const TOTAL_STEPS = 6;
@@ -57,6 +58,26 @@ export default function Index() {
     }
   };
 
+  const handleDocumentTypeRating = (type: keyof typeof formData.documentTypes, value: number) => {
+    setFormData(prev => ({
+      ...prev,
+      documentTypes: {
+        ...prev.documentTypes,
+        [type]: value
+      }
+    }));
+  };
+
+  const handleUsabilityRating = (type: keyof typeof formData.usability, value: number) => {
+    setFormData(prev => ({
+      ...prev,
+      usability: {
+        ...prev.usability,
+        [type]: value
+      }
+    }));
+  };
+
   const renderQuestion = () => {
     switch (currentStep) {
       case 1:
@@ -96,55 +117,46 @@ export default function Index() {
 
       case 3:
         return (
-          <SurveyQuestion
-            title="Типы документов"
-            tooltipContent="Оцените важность различных типов документов для вашей работы"
-            question="Оцените важность следующих типов документов (от 1 до 5)"
-            options={[
-              { value: "templates", label: "Шаблоны документов" },
-              { value: "regulations", label: "Регламенты и процедуры" },
-              { value: "faq", label: "Часто задаваемые вопросы (FAQ)" },
-              { value: "training", label: "Обучающие материалы" },
-              { value: "reference", label: "Справочная информация" },
-              { value: "contacts", label: "Контактные данные сотрудников" }
-            ]}
-            value={String(formData.documentTypes[formData.documentTypes as keyof typeof formData.documentTypes] || 0)}
-            onChange={(value) => {
-              const key = value as keyof typeof formData.documentTypes;
-              setFormData(prev => ({
-                ...prev,
-                documentTypes: {
-                  ...prev.documentTypes,
-                  [key]: Number(value)
-                }
-              }));
-            }}
-          />
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <h2 className="section-title">Типы документов</h2>
+              <p className="question-text">Оцените важность следующих типов документов (от 1 до 5):</p>
+              <div className="space-y-4">
+                {Object.entries(formData.documentTypes).map(([key, value]) => (
+                  <div key={key} className="flex justify-between items-center p-3 bg-secondary/50 rounded-lg">
+                    <span className="text-base">{getDocumentTypeLabel(key)}</span>
+                    <Rating
+                      value={value}
+                      onChange={(newValue) => handleDocumentTypeRating(key as keyof typeof formData.documentTypes, newValue)}
+                      max={5}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         );
 
       case 4:
         return (
-          <SurveyQuestion
-            title="Удобство использования"
-            tooltipContent="Оцените важность различных аспектов удобства использования"
-            question="Оцените важность следующих характеристик (от 1 до 5)"
-            options={[
-              { value: "search", label: "Поиск по базе знаний" },
-              { value: "navigation", label: "Удобство навигации" },
-              { value: "organization", label: "Организация материалов" }
-            ]}
-            value={String(formData.usability[formData.usability as keyof typeof formData.usability] || 0)}
-            onChange={(value) => {
-              const key = value as keyof typeof formData.usability;
-              setFormData(prev => ({
-                ...prev,
-                usability: {
-                  ...prev.usability,
-                  [key]: Number(value)
-                }
-              }));
-            }}
-          />
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <h2 className="section-title">Удобство использования</h2>
+              <p className="question-text">Оцените важность следующих характеристик (от 1 до 5):</p>
+              <div className="space-y-4">
+                {Object.entries(formData.usability).map(([key, value]) => (
+                  <div key={key} className="flex justify-between items-center p-3 bg-secondary/50 rounded-lg">
+                    <span className="text-base">{getUsabilityLabel(key)}</span>
+                    <Rating
+                      value={value}
+                      onChange={(newValue) => handleUsabilityRating(key as keyof typeof formData.usability, newValue)}
+                      max={5}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         );
 
       case 5:
@@ -175,6 +187,27 @@ export default function Index() {
       default:
         return null;
     }
+  };
+
+  const getDocumentTypeLabel = (key: string): string => {
+    const labels: Record<string, string> = {
+      templates: "Шаблоны документов",
+      regulations: "Регламенты и процедуры",
+      faq: "Часто задаваемые вопросы (FAQ)",
+      training: "Обучающие материалы",
+      reference: "Справочная информация",
+      contacts: "Контактные данные сотрудников"
+    };
+    return labels[key] || key;
+  };
+
+  const getUsabilityLabel = (key: string): string => {
+    const labels: Record<string, string> = {
+      search: "Поиск по базе знаний",
+      navigation: "Удобство навигации",
+      organization: "Организация материалов"
+    };
+    return labels[key] || key;
   };
 
   return (
