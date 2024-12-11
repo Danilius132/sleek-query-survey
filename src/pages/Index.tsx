@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { SurveyProgress } from "@/components/SurveyProgress";
 import { NavigationButtons } from "@/components/NavigationButtons";
 import { SurveyQuestion } from "@/components/SurveyQuestion";
-import { useToast } from "@/components/ui/use-toast";
 import { FeedbackSection } from "@/components/FeedbackSection";
 import { DocumentTypesSection } from "@/components/DocumentTypesSection";
 import { UsabilitySection } from "@/components/UsabilitySection";
-import { api } from "@/lib/api";
-import type { SurveyFormData } from "@/types/survey";
+import { useSurveySubmission } from "@/hooks/useSurveySubmission";
+import { supabase } from "@/integrations/supabase/client";
+import type { SurveyFormData } from "@/types/survey-types";
 
 const TOTAL_STEPS = 6;
 
@@ -35,97 +35,37 @@ export default function Index() {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<SurveyFormData>(initialFormData);
   const [departments, setDepartments] = useState([]);
-  const [surveys, setSurveys] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const { submitSurvey, isLoading } = useSurveySubmission();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [departmentsData, surveysData] = await Promise.all([
-          api.getDepartments(),
-          api.getSurveys()
-        ]);
-        setDepartments(departmentsData.results);
-        setSurveys(surveysData.results);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        toast({
-          title: "Ошибка",
-          description: "Не удалось загрузить данные",
-          variant: "destructive"
-        });
+    const fetchDepartments = async () => {
+      const { data } = await supabase
+        .from('employees')
+        .select('id, title')
+        .order('title');
+      
+      if (data) {
+        const uniqueDepartments = Array.from(new Set(data.map(emp => emp.title)))
+          .map(title => ({
+            id: title.toLowerCase().replace(/\s+/g, '-'),
+            name: title
+          }));
+        setDepartments(uniqueDepartments);
       }
     };
-    fetchData();
+
+    fetchDepartments();
   }, []);
 
-  useEffect(() => {
-    const surveyCard = document.querySelector('.survey-card');
-    if (surveyCard) {
-      surveyCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, [currentStep]);
-
-  const handleSubmit = async () => {
-    setIsLoading(true);
-    try {
-      if (!surveys.length) {
-        throw new Error('Нет активного опроса');
-      }
-
-      if (!formData.department) {
-        throw new Error('Выберите отдел');
-      }
-
-      const departmentId = parseInt(formData.department);
-      if (isNaN(departmentId)) {
-        throw new Error('Некорректный ID отдела');
-      }
-
-      const surveyResponse = {
-        survey: surveys[0]?.id,
-        department: departmentId,
-        binary_choice: formData.frequency === 'several-times-day' || formData.frequency === 'daily',
-        doc_type_1_rating: formData.documentTypes.templates || 1,
-        doc_type_2_rating: formData.documentTypes.regulations || 1,
-        doc_type_3_rating: formData.documentTypes.faq || 1,
-        doc_type_4_rating: formData.documentTypes.training || 1,
-        doc_type_5_rating: formData.documentTypes.reference || 1,
-        doc_type_6_rating: formData.documentTypes.contacts || 1,
-        usability_feature_1: formData.usability.search || 1,
-        usability_feature_2: formData.usability.navigation || 1,
-        usability_feature_3: formData.usability.organization || 1,
-        integration_preference: mapIntegrationPreference(formData.integration),
-        feedback: formData.feedback || ''
-      };
-
-      console.log('Подготовленные данные для отправки:', surveyResponse);
-      await api.submitSurveyResponse(surveyResponse);
-      
-      toast({
-        title: "Успех",
-        description: "Ваш ответ успешно отправлен!",
-      });
-      setFormData(initialFormData);
-      setCurrentStep(1);
-    } catch (error) {
-      console.error('Error submitting response:', error);
-      toast({
-        title: "Ошибка",
-        description: error instanceof Error ? error.message : "Не удалось отправить ответ",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < TOTAL_STEPS) {
       setCurrentStep(prev => prev + 1);
     } else {
-      handleSubmit();
+      const success = await submitSurvey(formData);
+      if (success) {
+        setFormData(initialFormData);
+        setCurrentStep(1);
+      }
     }
   };
 
@@ -161,7 +101,6 @@ export default function Index() {
         return (
           <SurveyQuestion
             title="Общая информация"
-            tooltipContent="Базовая информация о вашей роли и планируемом использовании базы знаний"
             question="К какому отделу вы относитесь?"
             options={departments.map(dept => ({
               value: dept.id.toString(),
@@ -176,7 +115,6 @@ export default function Index() {
         return (
           <SurveyQuestion
             title="Частота использования"
-            tooltipContent="Информация о планируемой частоте использования базы знаний"
             question="Как часто вы планируете использовать базу знаний?"
             options={[
               { value: "several-times-day", label: "Несколько раз в день" },
@@ -210,7 +148,6 @@ export default function Index() {
         return (
           <SurveyQuestion
             title="Интеграция"
-            tooltipContent="Выберите предпочтительный способ интеграции с существующими системами"
             question="Какой способ интеграции с существующими системами вы предпочитаете?"
             options={[
               { value: "full", label: "Полная интеграция со всеми системами" },
@@ -236,16 +173,6 @@ export default function Index() {
     }
   };
 
-  const mapIntegrationPreference = (integration: string): string => {
-    const mapping: Record<string, string> = {
-      'full': 'api',
-      'partial': 'plugin',
-      'minimal': 'standalone',
-      'none': 'standalone'
-    };
-    return mapping[integration] || 'standalone';
-  };
-
   return (
     <div className="min-h-screen p-4 flex flex-col items-center justify-center">
       <div className="w-full max-w-2xl space-y-6">
@@ -261,13 +188,7 @@ export default function Index() {
         <SurveyProgress currentStep={currentStep} totalSteps={TOTAL_STEPS} />
 
         <div className="survey-card">
-          {isLoading ? (
-            <div className="flex justify-center items-center p-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          ) : (
-            renderQuestion()
-          )}
+          {renderQuestion()}
           
           <NavigationButtons
             currentStep={currentStep}
