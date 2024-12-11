@@ -1,20 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis } from "recharts";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { FrequencyChart } from "@/components/analytics/FrequencyChart";
+import { DocumentTypesChart } from "@/components/analytics/DocumentTypesChart";
+import { UsabilityChart } from "@/components/analytics/UsabilityChart";
 
 interface AnalyticsData {
   departments: {
@@ -27,118 +17,139 @@ interface AnalyticsData {
   };
 }
 
-// Новая цветовая палитра
-const CHART_COLORS = {
-  primary: "#1EAEDB",    // Яркий синий
-  secondary: "#33C3F0",  // Небесно-голубой
-  tertiary: "#D3E4FD",   // Мягкий голубой
-  quaternary: "#E5DEFF", // Мягкий фиолетовый
-  quinary: "#F2FCE2",    // Мягкий зеленый
-  senary: "#FEF7CD"      // Мягкий желтый
-};
-
 export default function Analytics() {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isResetting, setIsResetting] = useState(false);
+  const { toast } = useToast();
+
+  const fetchAnalytics = async () => {
+    try {
+      const { data: responses } = await supabase
+        .from("survey_responses")
+        .select(`
+          id,
+          department,
+          frequency,
+          document_ratings (
+            document_type,
+            rating
+          ),
+          usability_ratings (
+            feature_type,
+            rating
+          ),
+          integration_preferences (
+            preference
+          )
+        `);
+
+      if (!responses) return;
+
+      const processedData: AnalyticsData = {
+        departments: {}
+      };
+
+      responses.forEach((response) => {
+        const dept = response.department;
+        if (!processedData.departments[dept]) {
+          processedData.departments[dept] = {
+            frequency: {},
+            documentTypes: {},
+            usability: {},
+            integration: {}
+          };
+        }
+
+        // Обработка частоты использования
+        if (!processedData.departments[dept].frequency[response.frequency]) {
+          processedData.departments[dept].frequency[response.frequency] = 0;
+        }
+        processedData.departments[dept].frequency[response.frequency]++;
+
+        // Обработка оценок документов
+        response.document_ratings?.forEach((rating) => {
+          if (!processedData.departments[dept].documentTypes[rating.document_type]) {
+            processedData.departments[dept].documentTypes[rating.document_type] = 0;
+          }
+          processedData.departments[dept].documentTypes[rating.document_type] += rating.rating;
+        });
+
+        // Обработка оценок юзабилити
+        response.usability_ratings?.forEach((rating) => {
+          if (!processedData.departments[dept].usability[rating.feature_type]) {
+            processedData.departments[dept].usability[rating.feature_type] = 0;
+          }
+          processedData.departments[dept].usability[rating.feature_type] += rating.rating;
+        });
+
+        // Обработка предпочтений интеграции
+        response.integration_preferences?.forEach((pref) => {
+          if (!processedData.departments[dept].integration[pref.preference]) {
+            processedData.departments[dept].integration[pref.preference] = 0;
+          }
+          processedData.departments[dept].integration[pref.preference]++;
+        });
+      });
+
+      // Вычисляем средние значения для оценок
+      Object.keys(processedData.departments).forEach((dept) => {
+        const deptData = processedData.departments[dept];
+        
+        // Среднее для документов
+        Object.keys(deptData.documentTypes).forEach((type) => {
+          const total = responses.filter(r => r.department === dept).length;
+          deptData.documentTypes[type] = Number((deptData.documentTypes[type] / total).toFixed(1));
+        });
+
+        // Среднее для юзабилити
+        Object.keys(deptData.usability).forEach((type) => {
+          const total = responses.filter(r => r.department === dept).length;
+          deptData.usability[type] = Number((deptData.usability[type] / total).toFixed(1));
+        });
+      });
+
+      setAnalyticsData(processedData);
+    } catch (error) {
+      console.error("Error fetching analytics:", error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось загрузить данные аналитики",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchAnalytics = async () => {
-      try {
-        const { data: responses } = await supabase
-          .from("survey_responses")
-          .select(`
-            id,
-            department,
-            frequency,
-            document_ratings (
-              document_type,
-              rating
-            ),
-            usability_ratings (
-              feature_type,
-              rating
-            ),
-            integration_preferences (
-              preference
-            )
-          `);
-
-        if (!responses) return;
-
-        // Преобразуем данные в нужный формат
-        const processedData: AnalyticsData = {
-          departments: {}
-        };
-
-        responses.forEach((response) => {
-          const dept = response.department;
-          if (!processedData.departments[dept]) {
-            processedData.departments[dept] = {
-              frequency: {},
-              documentTypes: {},
-              usability: {},
-              integration: {}
-            };
-          }
-
-          // Обработка частоты использования
-          if (!processedData.departments[dept].frequency[response.frequency]) {
-            processedData.departments[dept].frequency[response.frequency] = 0;
-          }
-          processedData.departments[dept].frequency[response.frequency]++;
-
-          // Обработка оценок документов
-          response.document_ratings?.forEach((rating) => {
-            if (!processedData.departments[dept].documentTypes[rating.document_type]) {
-              processedData.departments[dept].documentTypes[rating.document_type] = 0;
-            }
-            processedData.departments[dept].documentTypes[rating.document_type] += rating.rating;
-          });
-
-          // Обработка оценок юзабилити
-          response.usability_ratings?.forEach((rating) => {
-            if (!processedData.departments[dept].usability[rating.feature_type]) {
-              processedData.departments[dept].usability[rating.feature_type] = 0;
-            }
-            processedData.departments[dept].usability[rating.feature_type] += rating.rating;
-          });
-
-          // Обработка предпочтений интеграции
-          response.integration_preferences?.forEach((pref) => {
-            if (!processedData.departments[dept].integration[pref.preference]) {
-              processedData.departments[dept].integration[pref.preference] = 0;
-            }
-            processedData.departments[dept].integration[pref.preference]++;
-          });
-        });
-
-        // Вычисляем средние значения для оценок
-        Object.keys(processedData.departments).forEach((dept) => {
-          const deptData = processedData.departments[dept];
-          
-          // Среднее для документов
-          Object.keys(deptData.documentTypes).forEach((type) => {
-            const total = responses.filter(r => r.department === dept).length;
-            deptData.documentTypes[type] = Number((deptData.documentTypes[type] / total).toFixed(1));
-          });
-
-          // Среднее для юзабилити
-          Object.keys(deptData.usability).forEach((type) => {
-            const total = responses.filter(r => r.department === dept).length;
-            deptData.usability[type] = Number((deptData.usability[type] / total).toFixed(1));
-          });
-        });
-
-        setAnalyticsData(processedData);
-      } catch (error) {
-        console.error("Error fetching analytics:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchAnalytics();
   }, []);
+
+  const handleReset = async () => {
+    setIsResetting(true);
+    try {
+      const { error } = await supabase.rpc('clear_survey_responses');
+      if (error) throw error;
+
+      toast({
+        title: "Успех",
+        description: "Все ответы успешно удалены",
+      });
+
+      // Обновляем данные
+      await fetchAnalytics();
+    } catch (error) {
+      console.error("Error resetting survey responses:", error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось удалить ответы",
+        variant: "destructive"
+      });
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -151,11 +162,7 @@ export default function Analytics() {
   if (!analyticsData) {
     return (
       <div className="container mx-auto py-8">
-        <Card>
-          <CardContent className="py-8">
-            <p className="text-center text-muted-foreground">Нет данных для отображения</p>
-          </CardContent>
-        </Card>
+        <div className="text-center text-muted-foreground">Нет данных для отображения</div>
       </div>
     );
   }
@@ -166,7 +173,8 @@ export default function Analytics() {
     name: dept,
     "Несколько раз в день": analyticsData.departments[dept].frequency["several-times-day"] || 0,
     "Ежедневно": analyticsData.departments[dept].frequency["daily"] || 0,
-    "Несколько раз в неделю": analyticsData.departments[dept].frequency["several-times-week"] || 0
+    "Несколько раз в неделю": analyticsData.departments[dept].frequency["several-times-week"] || 0,
+    "Несколько раз в месяц": analyticsData.departments[dept].frequency["several-times-month"] || 0
   }));
 
   const docTypesData = departments.map(dept => ({
@@ -190,110 +198,19 @@ export default function Analytics() {
     <div className="container mx-auto py-8 space-y-8">
       <h1 className="text-3xl font-bold mb-8">Аналитика по опросу</h1>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Частота использования по отделам</CardTitle>
-          <CardDescription>
-            Как часто сотрудники планируют использовать базу знаний
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="h-[400px]">
-          <ChartContainer
-            className="w-full h-full"
-            config={{
-              frequency: {
-                theme: {
-                  light: CHART_COLORS.primary,
-                  dark: CHART_COLORS.primary
-                }
-              }
-            }}
-          >
-            <BarChart data={frequencyData}>
-              <XAxis dataKey="name" />
-              <YAxis />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="Несколько раз в день" fill={CHART_COLORS.primary} />
-              <Bar dataKey="Ежедневно" fill={CHART_COLORS.secondary} />
-              <Bar dataKey="Несколько раз в неделю" fill={CHART_COLORS.tertiary} />
-              <ChartLegend>
-                <ChartLegendContent />
-              </ChartLegend>
-            </BarChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+      <FrequencyChart data={frequencyData} />
+      <DocumentTypesChart data={docTypesData} />
+      <UsabilityChart data={usabilityData} />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Оценка типов документов</CardTitle>
-          <CardDescription>
-            Средняя оценка важности различных типов документов
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="h-[400px]">
-          <ChartContainer
-            className="w-full h-full"
-            config={{
-              docTypes: {
-                theme: {
-                  light: CHART_COLORS.primary,
-                  dark: CHART_COLORS.primary
-                }
-              }
-            }}
-          >
-            <BarChart data={docTypesData}>
-              <XAxis dataKey="name" />
-              <YAxis domain={[0, 5]} />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="Шаблоны" fill={CHART_COLORS.primary} />
-              <Bar dataKey="Регламенты" fill={CHART_COLORS.secondary} />
-              <Bar dataKey="FAQ" fill={CHART_COLORS.tertiary} />
-              <Bar dataKey="Обучение" fill={CHART_COLORS.quaternary} />
-              <Bar dataKey="Справочники" fill={CHART_COLORS.quinary} />
-              <Bar dataKey="Контакты" fill={CHART_COLORS.senary} />
-              <ChartLegend>
-                <ChartLegendContent />
-              </ChartLegend>
-            </BarChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Оценка удобства использования</CardTitle>
-          <CardDescription>
-            Средняя оценка различных аспектов удобства использования
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="h-[400px]">
-          <ChartContainer
-            className="w-full h-full"
-            config={{
-              usability: {
-                theme: {
-                  light: CHART_COLORS.primary,
-                  dark: CHART_COLORS.primary
-                }
-              }
-            }}
-          >
-            <BarChart data={usabilityData}>
-              <XAxis dataKey="name" />
-              <YAxis domain={[0, 5]} />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="Поиск" fill={CHART_COLORS.primary} />
-              <Bar dataKey="Навигация" fill={CHART_COLORS.secondary} />
-              <Bar dataKey="Организация" fill={CHART_COLORS.tertiary} />
-              <ChartLegend>
-                <ChartLegendContent />
-              </ChartLegend>
-            </BarChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+      <div className="flex justify-center pt-8">
+        <Button 
+          variant="destructive" 
+          onClick={handleReset}
+          disabled={isResetting}
+        >
+          {isResetting ? "Удаление..." : "Сбросить результаты"}
+        </Button>
+      </div>
     </div>
   );
 }
