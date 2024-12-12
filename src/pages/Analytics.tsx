@@ -174,7 +174,8 @@ export default function Analytics() {
     "Несколько раз в день": analyticsData.departments[dept].frequency["several-times-day"] || 0,
     "Ежедневно": analyticsData.departments[dept].frequency["daily"] || 0,
     "Несколько раз в неделю": analyticsData.departments[dept].frequency["several-times-week"] || 0,
-    "Несколько раз в месяц": analyticsData.departments[dept].frequency["several-times-month"] || 0
+    "Несколько раз в месяц": analyticsData.departments[dept].frequency["several-times-month"] || 0,
+    "Реже": analyticsData.departments[dept].frequency["less"] || 0
   }));
 
   const docTypesData = departments.map(dept => ({

@@ -10,6 +10,7 @@ interface FrequencyChartProps {
     "Ежедневно": number;
     "Несколько раз в неделю": number;
     "Несколько раз в месяц": number;
+    "Реже": number;
   }[];
 }
 
@@ -42,6 +43,7 @@ export function FrequencyChart({ data }: FrequencyChartProps) {
             <Bar dataKey="Ежедневно" fill={CHART_COLORS.secondary} />
             <Bar dataKey="Несколько раз в неделю" fill={CHART_COLORS.tertiary} />
             <Bar dataKey="Несколько раз в месяц" fill={CHART_COLORS.quaternary} />
+            <Bar dataKey="Реже" fill={CHART_COLORS.quinary} />
             <ChartLegend>
               <ChartLegendContent />
             </ChartLegend>
